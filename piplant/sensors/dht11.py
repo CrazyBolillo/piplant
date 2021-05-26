@@ -1,7 +1,5 @@
 import time
 
-import RPi.GPIO as GPIO
-
 from dht11 import DHT11
 
 from piplant import settings
@@ -17,9 +15,9 @@ class DHT11Sensor:
             'humidity': -1
         }
 
-    def get_data(self):
+    async def get_data(self):
         unix_time = int(time.time())
-        if unix_time - self.data['time'] < 5:
+        if (unix_time - self.data['time']) < 5:
             return self.data
         else:
             data = self.dht11.read()
@@ -32,9 +30,3 @@ class DHT11Sensor:
 
 
 dht11_sensor = DHT11Sensor()
-
-
-def startup():
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.cleanup()
