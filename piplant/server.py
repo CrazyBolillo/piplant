@@ -5,11 +5,12 @@ import uvicorn
 
 from fastapi import FastAPI
 
-from piplant.endpoints import ambient
+from piplant.rest import ambient, raspberry
 
 
 app = FastAPI()
 app.include_router(ambient.router)
+app.include_router(raspberry.router)
 
 
 @app.on_event('startup')
