@@ -7,4 +7,4 @@ router = APIRouter(tags=['ambient'])
 
 @router.get('/ambient')
 async def get():
-    return await sensor.get_cpu_data()
+    return await sensor.get_data()
