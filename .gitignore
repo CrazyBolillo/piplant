@@ -1,5 +1,5 @@
 # Config file
-.env
+piplant.conf.json
 
 # PyCharm
 .idea/

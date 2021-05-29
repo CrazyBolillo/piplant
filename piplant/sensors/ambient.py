@@ -1,10 +1,10 @@
 import time
 
+from fastapi import APIRouter
 from dht11 import DHT11
-
-from piplant import settings
-
 from pydantic import BaseModel
+
+from piplant.settings import settings
 
 
 class AmbientData(BaseModel):
@@ -16,7 +16,7 @@ class AmbientData(BaseModel):
 class DHT11Sensor:
 
     def __init__(self):
-        self.dht11 = DHT11(pin=settings.DHT11_PIN)
+        self.dht11 = DHT11(pin=settings.dht11_pin)
         self.data = AmbientData()
 
     async def get_data(self):
@@ -31,4 +31,12 @@ class DHT11Sensor:
         return self.data
 
 
-dht11_sensor = DHT11Sensor()
+sensor = DHT11Sensor()
+
+router = APIRouter(tags=['ambient'])
+
+
+@router.get('/ambient')
+async def get():
+    return await sensor.get_data()
+

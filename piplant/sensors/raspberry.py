@@ -3,6 +3,7 @@ import os
 import re
 import time
 
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 
@@ -50,4 +51,17 @@ class RaspberrySensor:
         return self.disk_data
 
 
-raspberry_sensor = RaspberrySensor()
+sensor = RaspberrySensor()
+
+router = APIRouter(tags=['raspberry'])
+
+
+@router.get('/raspberry/cpu')
+async def get_cpu():
+    return await sensor.get_cpu_data()
+
+
+@router.get('/raspberry/disk')
+async def get_disk():
+    return await sensor.get_disk_data()
+
