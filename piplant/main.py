@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import os
 
 import uvicorn
@@ -26,4 +27,7 @@ if __name__ == '__main__':
         with open(conf_path, 'r') as config_file:
             settings.load(config_file)
 
-    uvicorn.run('server:app', host=settings.interface, port=settings.port)
+    if settings.debug:
+        logging.getLogger('asyncio').setLevel(logging.DEBUG)
+
+    uvicorn.run('server:app', debug=settings.debug, host=settings.interface, port=settings.port)
