@@ -33,8 +33,8 @@ async def startup():
     GPIO.setmode(GPIO.BCM)
     GPIO.cleanup()
 
-    for pin in settings.relay_pins:
-        GPIO.setup(pin, GPIO.OUT, initial=GPIO.HIGH)
+    for relay in settings.relays:
+        GPIO.setup(relay.pin, GPIO.OUT, initial=GPIO.HIGH)
 
     try:
         await pool.start(host=settings.database.host, port=settings.database.port, database=settings.database.name,
