@@ -1,24 +1,13 @@
 import sys
 
-import asyncpg
 import RPi.GPIO as GPIO
 
 from fastapi import FastAPI
 
 from piplant.sensors import ambient, camera, raspberry, relays
 from piplant.settings import settings
+from piplant.database import pool
 
-
-class ConnectionPool:
-
-    def __init__(self):
-        self.pool = None
-
-    async def start(self, **kwargs):
-        self.pool = await asyncpg.create_pool(**kwargs)
-
-
-pool = ConnectionPool()
 
 app = FastAPI(
     title="Piplant",
@@ -37,11 +26,13 @@ async def startup():
     GPIO.setmode(GPIO.BCM)
     GPIO.cleanup()
 
-    for relay in settings.relays:
-        GPIO.setup(relay.pin, GPIO.OUT, initial=GPIO.HIGH)
-
     try:
         await pool.start(host=settings.database.host, port=settings.database.port, database=settings.database.name,
                          user=settings.database.username, password=settings.database.password)
     except Exception as ex:
         sys.exit(1)
+
+    async with pool.pool.acquire() as connection:
+        async with connection.transaction():
+            async for relay in connection.cursor('SELECT pin, active_low FROM relays'):
+                await relays.toggle_pin(relay['pin'], relay['active_low'], False)
