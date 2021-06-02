@@ -1,11 +1,9 @@
 import argparse
-import json
 import logging
 import os
 
 import uvicorn
 
-from dotmap import DotMap
 
 from piplant.settings import settings
 
