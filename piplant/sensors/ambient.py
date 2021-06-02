@@ -36,7 +36,12 @@ sensor = DHT11Sensor()
 router = APIRouter(tags=['ambient'])
 
 
-@router.get('/ambient')
+@router.get('/ambient', response_model=AmbientData)
 async def get():
+    """
+    Measures the relative humidity and temperature.
+    :return: A measurement of relative humidity and temperature. Measurement is guaranteed to be 5 seconds old or less.
+    (UNIX time)
+    """
     return await sensor.get_data()
 

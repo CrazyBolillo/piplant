@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 
 from fastapi import FastAPI
 
-from piplant.sensors import ambient, camera, raspberry
+from piplant.sensors import ambient, camera, raspberry, relays
 from piplant.settings import settings
 
 
@@ -20,10 +20,15 @@ class ConnectionPool:
 
 pool = ConnectionPool()
 
-app = FastAPI()
+app = FastAPI(
+    title="Piplant",
+    description="IOT project that lets you control and monitor plants remotely",
+    version="0.1.0"
+)
 app.include_router(ambient.router)
 app.include_router(camera.router)
 app.include_router(raspberry.router)
+app.include_router(relays.router)
 
 
 @app.on_event('startup')

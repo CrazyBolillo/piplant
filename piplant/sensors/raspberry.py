@@ -56,12 +56,22 @@ sensor = RaspberrySensor()
 router = APIRouter(tags=['raspberry'])
 
 
-@router.get('/raspberry/cpu')
+@router.get('/raspberry/cpu', response_model=CpuData)
 async def get_cpu():
+    """
+    Reads data from /proc/loadavg.
+    :return: Returns the temperature and load on the CPU (last 1 min. average). Measurement is guaranteed to be
+    5 seconds old or less (UNIX time).
+    """
     return await sensor.get_cpu_data()
 
 
-@router.get('/raspberry/disk')
+@router.get('/raspberry/disk', response_model=MemoryData)
 async def get_disk():
+    """
+    Reads disk data from statvfs.
+    :return: Size, used and free space from the disk attached to the root ('/') directory. Measurement is guaranteed
+    to be 5 seconds old or less (UNIX time)
+    """
     return await sensor.get_disk_data()
 

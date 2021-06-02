@@ -19,12 +19,16 @@ class RaspberryCamera:
         self.camera.capture(stream, 'jpeg')
 
 
-router = APIRouter()
+router = APIRouter(tags=['camera'])
 sensor = RaspberryCamera()
 
 
 @router.get('/camera')
 async def get_image():
+    """
+    Takes a .jpeg photo.
+    :return: Byte stream representing the image taken.
+    """
     stream = BytesIO()
     await sensor.take_photo(stream)
     stream.seek(0)
