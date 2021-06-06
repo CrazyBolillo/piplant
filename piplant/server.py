@@ -3,6 +3,7 @@ import sys
 import RPi.GPIO as GPIO
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from piplant.sensors import ambient, camera, raspberry, relays
 from piplant.settings import settings
@@ -19,6 +20,13 @@ app.include_router(camera.router)
 app.include_router(raspberry.router)
 app.include_router(relays.router)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.allow_origins,
+    allow_credentials=settings.allow_credentials,
+    allow_methods=settings.allow_methods,
+    allow_headers=settings.allow_headers,
+)
 
 @app.on_event('startup')
 async def startup():

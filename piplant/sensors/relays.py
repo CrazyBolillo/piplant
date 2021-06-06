@@ -22,6 +22,10 @@ class RelayModel(BaseModel):
     active_low: bool
 
 
+class RelayStateModel(RelayModel):
+    on: bool
+
+
 async def get_relay(pin: int):
     async with pool.pool.acquire() as connection:
         stmt = await connection.prepare('SELECT pin, name, active_low FROM relays WHERE pin = $1')
@@ -78,7 +82,7 @@ async def turn_on_relay(pin: int):
         return Response(status_code=204)
 
 
-@router.get('/relays', status_code=200, response_model=List[RelayModel])
+@router.get('/relays', status_code=200, response_model=List[RelayStateModel])
 async def get_relays():
     """
     Lists all existing relays.
@@ -88,7 +92,8 @@ async def get_relays():
     async with pool.pool.acquire() as connection:
         async with connection.transaction():
             async for relay in connection.cursor('SELECT pin, name, active_low FROM relays'):
-                values.append(RelayModel(**relay))
+                state = GPIO.input(relay['pin'])
+                values.append(RelayStateModel(**relay, on=state ^ relay['active_low']))
 
         return values
 
