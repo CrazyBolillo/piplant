@@ -109,10 +109,12 @@ async def create_relay(relay: RelayModel):
         stmt = await connection.prepare('INSERT INTO relays (pin, name, active_low) VALUES ($1, $2, $3)')
         try:
             await stmt.fetchval(relay.pin, relay.name, relay.active_low)
+            read_relay = await get_relay(relay.pin)
+            await toggle_relay(read_relay, False)
+            return read_relay
         except UniqueViolationError as ex:
             raise HTTPException(status_code=400, detail='A relay controlled by that pin already exists.')
 
-    return await get_relay(relay.pin)
 
 
 @router.put('/relay/{pin}', status_code=200, response_model=RelayModel)

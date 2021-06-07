@@ -44,9 +44,9 @@ class RaspberrySensor:
         if (unix_time - self.disk_data.time) > 5:
             data = os.statvfs('/')
             self.disk_data.time = unix_time
-            self.disk_data.size = data.f_bsize * data.f_blocks / 1024000000
-            self.disk_data.free = data.f_bsize * data.f_bavail / 1024000000
-            self.disk_data.used = self.disk_data.size - self.disk_data.free
+            self.disk_data.size = round(data.f_bsize * data.f_blocks / 1024000000, 2)
+            self.disk_data.free = round(data.f_bsize * data.f_bavail / 1024000000, 2)
+            self.disk_data.used = round(self.disk_data.size - self.disk_data.free, 2)
 
         return self.disk_data
 
