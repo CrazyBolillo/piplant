@@ -116,7 +116,6 @@ async def create_relay(relay: RelayModel):
             raise HTTPException(status_code=400, detail='A relay controlled by that pin already exists.')
 
 
-
 @router.put('/relay/{pin}', status_code=200, response_model=RelayModel)
 async def update_relay(pin: int, relay: RelayModel):
     """

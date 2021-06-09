@@ -2,9 +2,12 @@ import sys
 
 import RPi.GPIO as GPIO
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from piplant.jobs import measure_ambient
 from piplant.sensors import ambient, camera, raspberry, relays
 from piplant.settings import settings
 from piplant.database import pool
@@ -28,19 +31,38 @@ app.add_middleware(
     allow_headers=settings.allow_headers,
 )
 
-@app.on_event('startup')
-async def startup():
-    GPIO.setwarnings(False)
-    GPIO.setmode(GPIO.BCM)
-    GPIO.cleanup()
+scheduler = AsyncIOScheduler()
 
+
+async def startup_pool():
     try:
         await pool.start(host=settings.database.host, port=settings.database.port, database=settings.database.name,
                          user=settings.database.username, password=settings.database.password)
     except Exception as ex:
         sys.exit(1)
 
+
+async def startup_relays():
     async with pool.pool.acquire() as connection:
         async with connection.transaction():
             async for relay in connection.cursor('SELECT pin, active_low FROM relays'):
                 await relays.toggle_pin(relay['pin'], relay['active_low'], False)
+
+
+async def startup_jobs():
+    scheduler.add_job(measure_ambient, 'interval', seconds=900, id='ambient')
+    scheduler.start()
+
+
+@app.on_event('startup')
+async def startup():
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.cleanup()
+
+    await startup_pool()
+    await startup_relays()
+    await startup_jobs()
+
+
+
